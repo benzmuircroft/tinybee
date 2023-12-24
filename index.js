@@ -1,26 +1,15 @@
-const tinybee = async (options) => { // self-invoking function
+const tinybee = async (folderName) => { // self-invoking function
   return new Promise(async (resolve) => {
     const Corestore = require('corestore');
     const Hyperbee = require('hyperbee');
 
     let base, swarm, keyPair;
 
-    if (!options) {
-      throw new Error('options object is missing');
-    }
-    else if (!options.folderName || typeof options.folderName !== 'string') {
-      throw new Error('options.folderName should be a string');
-    }
-    else if (options.testFolder && typeof options.testFolder !== 'string') {
-      throw new Error('options.testFolder should be a string');
-    }
-
-    let folder = `./${options.folderName}`;
-    if (options.testFolder) {
-      folder += `/${options.testFolder}`;
+    if (!folderName || typeof folderName !== 'string') {
+      throw new Error('folderName should be a string');
     }
     
-    const store = new Corestore(folder);
+    const store = new Corestore(folderName);
     await store.ready();
     let input, backup, db, hd;
     backup = store.get({ name: 'backup', sparse:false, createIfMissing: false, overwrite: false });
