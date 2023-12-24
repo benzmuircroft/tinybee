@@ -1,0 +1,25 @@
+{
+  "name": "tinybee",
+  "version": "0.0.1",
+  "description": "A hyperbee that removes history on startup",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benzmuircroft/tinybee"
+  },
+  "dependencies": {
+    "hyperbee": "^2.18.1",
+    "corestore": "^6.15.13"
+  },
+  "keywords": [
+    "local-first",
+    "offline-first",
+    "distributed",
+    "p2p",
+    "hypercore",
+    "corestore",
+    "database"
+  ],
+  "author": "Benz Muircroft",
+  "license": "MIT"
+}
