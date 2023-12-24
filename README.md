@@ -3,7 +3,7 @@ A hyperbee that removes history on startup
 
 ## Installation:
 ```
-npm i "githib:benzmuircroft/tinybee"
+npm i "github:benzmuircroft/tinybee"
 ```
 
 ## Usage:
