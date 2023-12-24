@@ -1,6 +1,11 @@
 # 🕳🥊 tinybee
 A hyperbee that removes history on startup
 
+```
+npm i "githib:benzmuircroft/tinybee"
+```
+
+## Usage:
 ```js
 const tinybee = require('tinybee')('folderName');
 
