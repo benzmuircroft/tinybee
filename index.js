@@ -59,6 +59,7 @@ const tinybee = async (folderName) => { // self-invoking function
     hd = {
       bee: db, // todo: remove
       put: async function(k, v) {
+        if (typeof v == 'object') v = JSON.stringify(v);
         await db.put(k, v);
       },
       get: async function(k) {
