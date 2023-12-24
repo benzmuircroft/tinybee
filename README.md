@@ -18,3 +18,5 @@ console.log(await tinybee.get('a')); // 0
 console.log(await tinybee.get('b')); // 'string'
 console.log(await tinybee.get('c')); // { d: [0, 1, 2] }
 ```
+
+*best used for a private core*
