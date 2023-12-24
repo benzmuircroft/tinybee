@@ -6,5 +6,5 @@ const tinybee = require('tinybee')('folderName');
 
 await tinybee.put('a', 0);
 
-console.log(await tinybee.get('a'));
+console.log(await tinybee.get('a')); // 0
 ```
