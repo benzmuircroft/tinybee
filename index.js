@@ -57,14 +57,26 @@ const tinybee = async (folderName) => { // self-invoking function
       }
     }
     hd = {
-      bee: db, // todo: remove
-      put: async function(k, v) {
-        if (typeof v == 'object') v = JSON.stringify(v);
-        await db.put(k, v);
+      put: async function(k, v, sub) {
+        if (typeof v !== 'string') v = JSON.stringify(v);
+        if (sub) {
+          sub = db.sub(sub);
+          await sub.put(k, v);
+        }
+        else {
+          await db.put(k, v);
+        }
       },
-      get: async function(k) {
-        if (!k) { // get all keys
-          const all = db.createReadStream();
+      get: async function(k, sub) {
+        if (!k) {
+          let all;
+          if (sub) {
+            sub = db.sub(sub);
+            all = sub.createReadStream();
+          }
+          else {
+            all = db.createReadStream();
+          }
           const obj = {};
           for await (const entry of all) {
             entry.value = entry.value.toString();
@@ -73,15 +85,25 @@ const tinybee = async (folderName) => { // self-invoking function
           }
           return obj;
         }
-        else { // get a key
+        else {
           k = await db.get(k);
           if (!k) return null;
           k = k.value.toString();
           if (['[', '{'].includes(k[0])) return JSON.parse(k);
           else return k;
         }
+      },
+      del: async function(k, sub) {
+        if (sub) {
+          sub = db.sub(sub);
+          await sub.del(k);
+        }
+        else {
+          await db.del(k);
+        }
       }
     }; // hd
+    resolve(hd);
   });
 };
 
