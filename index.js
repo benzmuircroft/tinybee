@@ -1,4 +1,4 @@
-const tinybee = async (folderName) => { // self-invoking function
+const tinybee = async (folderName, debug) => { // self-invoking function
   return new Promise(async (resolve) => {
     const Corestore = require('corestore');
     const Hyperbee = require('hyperbee');
@@ -13,9 +13,9 @@ const tinybee = async (folderName) => { // self-invoking function
     await store.ready();
     let input, backup, db, hd;
     backup = store.get({ name: 'backup', sparse:false, createIfMissing: false, overwrite: false });
-    console.log(backup);
+    if (debug) console.log(backup);
     if (backup.id) {
-      console.log('bu');
+      if (debug) console.log('core migration was not completed. using backup instead.');
       await backup.ready();
       let s1 = backup.replicate(true);
       let s2 = input.replicate(false);
@@ -27,7 +27,6 @@ const tinybee = async (folderName) => { // self-invoking function
       input = store.get({ name: 'input', sparse: false });
       await input.ready();
       if (input.length) {
-        console.log('mg');
         backup = store.get({ name: 'backup', sparse: false });
         let s1 = input.replicate(true);
         let s2 = backup.replicate(false);
@@ -38,7 +37,7 @@ const tinybee = async (folderName) => { // self-invoking function
         for await (const entry of view) {
           obj[entry.key.toString()] = entry.value.toString();
         }
-        console.log(obj);
+        if (debug) console.log('migrating core entries', obj);
         await input.purge();
         input = store.get({ name: 'input', sparse: false });
         await input.ready();
@@ -51,7 +50,7 @@ const tinybee = async (folderName) => { // self-invoking function
         await backup.purge();
       }
       else {
-        console.log('nm');
+        if (debug) console.log('fresh core');
         db = new Hyperbee(input);
         await db.ready();
       }
