@@ -63,11 +63,23 @@ const tinybee = async (folderName) => { // self-invoking function
         await db.put(k, v);
       },
       get: async function(k) {
-        k = await db.get(k);
-        if (!k) return null;
-        k = k.value.toString();
-        if (['[', '{'].includes(k[0])) return JSON.parse(k);
-        else return k;
+        if (!k) { // get all keys
+          const all = db.createReadStream();
+          const obj = {};
+          for await (const entry of all) {
+            entry.value = entry.value.toString();
+            if (['[', '{'].includes(entry.value[0])) entry.value = JSON.parse(entry.value);
+            obj[entry.key.toString()] = entry.value;
+          }
+          return obj;
+        }
+        else { // get a key
+          k = await db.get(k);
+          if (!k) return null;
+          k = k.value.toString();
+          if (['[', '{'].includes(k[0])) return JSON.parse(k);
+          else return k;
+        }
       }
     }; // hd
   });
