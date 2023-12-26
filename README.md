@@ -11,7 +11,8 @@ npm i "github:benzmuircroft/tinybee"
 const tinybee = require('tinybee')({
   folderNameOrCorestore: './location',
   inputName: 'test',
-  ...options
+  ...options,
+  debug: true // see what it's doing under the hood ...
 });
 
 await tinybee.put('a', 0);
