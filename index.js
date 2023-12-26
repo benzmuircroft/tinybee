@@ -10,9 +10,10 @@ const tinybee = async (folderName, inputName, debug) => { // self-invoking funct
     const store = new Corestore(folderName);
     await store.ready();
     let input, backup, db, tb;
-    backup = store.get({ name: 'backup', sparse:false, createIfMissing: false, overwrite: false });
+    backup = store.get({ name: `${inputName}-backup`, sparse:false, createIfMissing: false, overwrite: false });
     if (debug) console.log(backup);
     if (backup.id) {
+      input = store.get({ name: inputName, sparse: false, overwrite: true });
       if (debug) console.log('core migration was not completed. using backup instead.');
       await backup.ready();
       let s1 = backup.replicate(true);
@@ -22,10 +23,10 @@ const tinybee = async (folderName, inputName, debug) => { // self-invoking funct
       await db.ready();
     }
     else {
-      input = store.get({ name: 'input', sparse: false });
+      input = store.get({ name: inputName, sparse: false });
       await input.ready();
       if (input.length) {
-        backup = store.get({ name: 'backup', sparse: false });
+        backup = store.get({ name: `${inputName}-backup`, sparse: false });
         let s1 = input.replicate(true);
         let s2 = backup.replicate(false);
         s1.pipe(s2).pipe(s1);
