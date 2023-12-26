@@ -34,5 +34,3 @@ await tinybee.del('a', subName);
 // get all entries as JSON object
 await tinybee.get();
 ```
-
-*" best used for a private core ... "*
