@@ -1,27 +1,31 @@
-const tinybee = async (folderNameOrCorestore, inputName, debug) => { // self-invoking function
+const tinybee = async (options) => { // self-invoking function
   return new Promise(async (resolve) => {
     const Hyperbee = require('hyperbee');
-
+    
     let store;
 
-    if (typeof folderNameOrCorestore == 'string') {
-      const Corestore = require('corestore');
-      store = new Corestore(folderNameOrCorestore);
+    if (!['string','undefined'].includes(typeof options.inputName)) {
+      throw new Error('options.inputNamee should be undefined or a string');
     }
-    else if (typeof folderNameOrCorestore == 'object') {
-      store = folderNameOrCorestore
+    if (typeof options.folderNameOrCorestore  == 'string') {
+      const Corestore = require('corestore');
+      if (Object.keys(options).length) store = new Corestore(options.folderNameOrCorestore, options);
+      else store = new Corestore(options.folderNameOrCorestore);
+    }
+    else if (typeof options.folderNameOrCorestore == 'object') {
+      store = options.folderNameOrCorestore;
     }
     else {
-      throw new Error('folderNameOrCorestore should be a string or a corestore');
+      throw new Error('options.folderNameOrCorestore should be a string or a corestore');
     }
     
     await store.ready();
     let input, backup, db, tb;
     backup = store.get({ name: `${inputName}-backup`, sparse:false, createIfMissing: false, overwrite: false });
-    if (debug) console.log(backup);
+    if (options.debug) console.log(backup);
     if (backup.id) {
       input = store.get({ name: inputName, sparse: false, overwrite: true });
-      if (debug) console.log('core migration was not completed. using backup instead.');
+      if (options.debug) console.log('core migration was not completed. using backup instead.');
       await backup.ready();
       let s1 = backup.replicate(true);
       let s2 = input.replicate(false);
@@ -43,7 +47,7 @@ const tinybee = async (folderNameOrCorestore, inputName, debug) => { // self-inv
         for await (const entry of view) {
           obj[entry.key.toString()] = entry.value.toString();
         }
-        if (debug) console.log('migrating core entries', obj);
+        if (options.debug) console.log('migrating core entries', obj);
         await input.purge();
         input = store.get({ name: 'input', sparse: false });
         await input.ready();
@@ -56,7 +60,7 @@ const tinybee = async (folderNameOrCorestore, inputName, debug) => { // self-inv
         await backup.purge();
       }
       else {
-        if (debug) console.log('fresh core');
+        if (options.debug) console.log('fresh core');
         db = new Hyperbee(input);
         await db.ready();
       }
