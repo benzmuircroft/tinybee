@@ -3,15 +3,13 @@ const tinybee = async (folderName, debug) => { // self-invoking function
     const Corestore = require('corestore');
     const Hyperbee = require('hyperbee');
 
-    let swarm, keyPair;
-
     if (!folderName || typeof folderName !== 'string') {
       throw new Error('folderName should be a string');
     }
     
     const store = new Corestore(folderName);
     await store.ready();
-    let input, backup, db, hd;
+    let input, backup, db, tb;
     backup = store.get({ name: 'backup', sparse:false, createIfMissing: false, overwrite: false });
     if (debug) console.log(backup);
     if (backup.id) {
@@ -55,7 +53,7 @@ const tinybee = async (folderName, debug) => { // self-invoking function
         await db.ready();
       }
     }
-    hd = {
+    tb = {
       put: async function(k, v, sub) {
         if (typeof v !== 'string') v = JSON.stringify(v);
         if (sub) {
@@ -101,8 +99,8 @@ const tinybee = async (folderName, debug) => { // self-invoking function
           await db.del(k);
         }
       }
-    }; // hd
-    resolve(hd);
+    }; // tb
+    resolve(tb);
   });
 };
 
