@@ -1,6 +1,4 @@
 ;(async function() {
-
-  const userKey = 'subNameString';
   
   const tinybee = require('tinybee')({
     folderNameOrCorestore: './location',
@@ -20,9 +18,10 @@
   await tinybee.del('a');
   
   // using subs
-  await tinybee.put('a', 0, userKey);
-  console.log(await tinybee.get('a', userKey));
-  await tinybee.del('a', userKey);
+  const subName = 'subName';
+  await tinybee.put('a', 0, subName);
+  console.log(await tinybee.get('a', subName));
+  await tinybee.del('a', subName);
   
   // get all entries as JSON object
   await tinybee.get();
