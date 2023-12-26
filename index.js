@@ -3,7 +3,7 @@ const tinybee = async (folderName, debug) => { // self-invoking function
     const Corestore = require('corestore');
     const Hyperbee = require('hyperbee');
 
-    let base, swarm, keyPair;
+    let swarm, keyPair;
 
     if (!folderName || typeof folderName !== 'string') {
       throw new Error('folderName should be a string');
