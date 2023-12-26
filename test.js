@@ -2,7 +2,7 @@
 
   const userKey = 'subNameString';
   
-  const tinybee = require('tinybee')('folderName', 'inputName');
+  const tinybee = require('tinybee')('folderNameOrCorestore', 'inputName');
 
   await tinybee.put('a', 0);
   await tinybee.put('b', 'string');
