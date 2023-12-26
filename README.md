@@ -8,7 +8,7 @@ npm i "github:benzmuircroft/tinybee"
 
 ## Usage:
 ```js
-const tinybee = require('tinybee')('folderName');
+const tinybee = require('tinybee')('folderName', 'inputName');
 
 await tinybee.put('a', 0);
 await tinybee.put('b', 'string');
