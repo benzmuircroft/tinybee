@@ -1,13 +1,21 @@
-const tinybee = async (folderName, inputName, debug) => { // self-invoking function
+const tinybee = async (folderNameOrCorestore, inputName, debug) => { // self-invoking function
   return new Promise(async (resolve) => {
-    const Corestore = require('corestore');
     const Hyperbee = require('hyperbee');
 
-    if (!folderName || typeof folderName !== 'string') {
-      throw new Error('folderName should be a string');
+    let store;
+
+    if (typeof folderNameOrCorestore == 'string') {
+      const Corestore = require('corestore');
+      store = new Corestore(folderNameOrCorestore);
+    }
+    else if (typeof folderNameOrCorestore == 'object') {
+      store = folderNameOrCorestore
+    }
+    else {
+      throw new Error('folderNameOrCorestore should be a string or a corestore');
     }
     
-    const store = new Corestore(folderName);
+    const store = new Corestore(folderNameOrCorestore);
     await store.ready();
     let input, backup, db, tb;
     backup = store.get({ name: `${inputName}-backup`, sparse:false, createIfMissing: false, overwrite: false });
