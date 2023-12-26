@@ -1,4 +1,4 @@
-const tinybee = async (folderName, debug) => { // self-invoking function
+const tinybee = async (folderName, inputName, debug) => { // self-invoking function
   return new Promise(async (resolve) => {
     const Corestore = require('corestore');
     const Hyperbee = require('hyperbee');
