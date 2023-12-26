@@ -15,7 +15,6 @@ const tinybee = async (folderNameOrCorestore, inputName, debug) => { // self-inv
       throw new Error('folderNameOrCorestore should be a string or a corestore');
     }
     
-    const store = new Corestore(folderNameOrCorestore);
     await store.ready();
     let input, backup, db, tb;
     backup = store.get({ name: `${inputName}-backup`, sparse:false, createIfMissing: false, overwrite: false });
