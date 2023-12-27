@@ -26,4 +26,15 @@
   // get all entries as JSON object
   await tinybee.get();
   
+  await tinybee.batch([
+    ['put', 'h', 9],
+    ['del', 'xyz'],
+    ['put', 'abc', { frog: true }]
+  ]);
+  
+  await tinybee.batch([
+    ['put', 'name', 'benz'],
+    ['put', 'password', 'xxxx']
+  ], subName);
+  
 })();
