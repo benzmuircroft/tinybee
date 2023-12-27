@@ -76,7 +76,7 @@ const tinybee = async (options) => { // self-invoking function
           batch = db.batch();
         }
         for await (const job of array) {
-          if (!Array.isArray(job) || ((job[1] == 'put' && job.length != 3) || (job[1] == 'del' && job.length != 2))) {
+          if (!Array.isArray(job) || (job[1] == 'put' && job.length != 3) || (job[1] == 'del' && job.length != 2)) {
             throw new Error(`Malformed batch at ${JSON.stringify(job)}`);
           }
           if (job[2] && typeof job[2] !== 'string') v = JSON.stringify(job[2]);
