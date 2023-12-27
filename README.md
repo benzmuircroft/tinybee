@@ -34,6 +34,7 @@ await tinybee.del('a', subName);
 
 // get all entries as JSON object
 await tinybee.get();
+await tinybee.get(undefined, subName);
 
 await tinybee.batch([
   ['put', 'h', 9],
