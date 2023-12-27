@@ -131,6 +131,7 @@ const tinybee = async (options) => { // self-invoking function
         }
       }
     }; // tb
+    tb = { ...tb, ...options };
     resolve(tb);
   });
 };
