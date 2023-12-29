@@ -1,11 +1,12 @@
 const tinybee = async (options) => { // self-invoking function
   return new Promise(async (resolve) => {
     const Hyperbee = require('hyperbee');
+    const b4a = require('b4a');
     
     let store;
 
     if (!['string','undefined'].includes(typeof options.inputName)) {
-      throw new Error('options.inputNamee should be undefined or a string');
+      throw new Error('options.inputName should be undefined or a string');
     }
     if (typeof options.folderNameOrCorestore  == 'string') {
       const Corestore = require('corestore');
@@ -18,53 +19,70 @@ const tinybee = async (options) => { // self-invoking function
     else {
       throw new Error('options.folderNameOrCorestore should be a string or a corestore');
     }
+
+    let writable = true;
+    if (options.inputName && options.inputName.length == 64) {
+      options.inputName = b4a.from(options.inputName, 'hex');
+      writable = false;
+    }
     
     await store.ready();
-    let input, backup, db, tb;
-    backup = store.get({ name: `${inputName}-backup`, sparse:false, createIfMissing: false, overwrite: false });
-    if (options.debug) console.log(backup);
-    if (backup.id) {
-      input = store.get({ name: inputName, sparse: false, overwrite: true });
-      if (options.debug) console.log('core migration was not completed. using backup instead.');
-      await backup.ready();
-      let s1 = backup.replicate(true);
-      let s2 = input.replicate(false);
-      s1.pipe(s2).pipe(s1);
+    let input, db, tb;
+
+    if (!writable) {
+      if (options.debug) console.log('read only core');
+      input = store.get(options.inputName, { sparse: false });
       db = new Hyperbee(input);
       await db.ready();
     }
     else {
-      input = store.get({ name: inputName, sparse: false });
-      await input.ready();
-      if (input.length) {
-        backup = store.get({ name: `${inputName}-backup`, sparse: false });
-        let s1 = input.replicate(true);
-        let s2 = backup.replicate(false);
+      let backup;
+      backup = store.get({ name: `${options.inputName}-backup`, sparse:false, createIfMissing: false, overwrite: false });
+      if (options.debug) console.log(backup);
+      if (backup.id) {
+        input = store.get({ name: options.inputName, sparse: false, overwrite: true });
+        if (options.debug) console.log('core migration was not completed. using backup instead.');
+        await backup.ready();
+        let s1 = backup.replicate(true);
+        let s2 = input.replicate(false);
         s1.pipe(s2).pipe(s1);
-        let migrate = new Hyperbee(input);
-        const view = migrate.createReadStream();
-        const obj = {};
-        for await (const entry of view) {
-          obj[entry.key.toString()] = entry.value.toString();
-        }
-        if (options.debug) console.log('migrating core entries', obj);
-        await input.purge();
-        input = store.get({ name: 'input', sparse: false });
-        await input.ready();
         db = new Hyperbee(input);
         await db.ready();
-        for (const entry in obj) {
-          await db.put(entry, obj[entry]);
-        }
-        await migrate.close();
-        await backup.purge();
       }
       else {
-        if (options.debug) console.log('fresh core');
-        db = new Hyperbee(input);
-        await db.ready();
+        input = store.get({ name: options.inputName, sparse: false });
+        await input.ready();
+        if (input.length) {
+          backup = store.get({ name: `${options.inputName}-backup`, sparse: false });
+          let s1 = input.replicate(true);
+          let s2 = backup.replicate(false);
+          s1.pipe(s2).pipe(s1);
+          let migrate = new Hyperbee(input);
+          const view = migrate.createReadStream();
+          const obj = {};
+          for await (const entry of view) {
+            obj[entry.key.toString()] = entry.value.toString();
+          }
+          if (options.debug) console.log('migrating core entries', obj);
+          await input.purge();
+          input = store.get({ name: 'input', sparse: false });
+          await input.ready();
+          db = new Hyperbee(input);
+          await db.ready();
+          for (const entry in obj) {
+            await db.put(entry, obj[entry]);
+          }
+          await migrate.close();
+          await backup.purge();
+        }
+        else {
+          if (options.debug) console.log('fresh core');
+          db = new Hyperbee(input);
+          await db.ready();
+        }
       }
     }
+    
     tb = {
       batch: async function(array /*[[put/del, k, v],]*/, sub) {
         let batch;
@@ -131,6 +149,11 @@ const tinybee = async (options) => { // self-invoking function
         }
       }
     }; // tb
+    if (!writable) {
+      delete tb.batch;
+      delete tb.put;
+      delete tb.del;
+    }
     tb = { ...tb, ...options };
     resolve(tb);
   });
