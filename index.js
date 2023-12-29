@@ -29,7 +29,7 @@ const tinybee = async (options) => { // self-invoking function
     await store.ready();
     let input, db, tb;
 
-    if (!writable) {
+    if (!writable) { // todo: use RAM
       if (options.debug) console.log('read only core');
       input = store.get(options.inputName, { sparse: false });
       db = new Hyperbee(input);
