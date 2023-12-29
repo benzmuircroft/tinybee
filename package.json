@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "hyperbee": "^2.18.1",
-    "corestore": "^6.15.13"
+    "corestore": "^6.15.13",
+    "b4a": "^1.6.0"
   },
   "keywords": [
     "local-first",
