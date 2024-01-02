@@ -34,6 +34,7 @@ const tinybee = async (options) => { // self-invoking function
       input = store.get(options.inputName, { sparse: false });
       db = new Hyperbee(input);
       await db.ready();
+      if (db.writable) writable = true; // user is recovering using hex id not publicKey assumed above
     }
     else {
       let backup;
