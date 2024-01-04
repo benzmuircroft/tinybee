@@ -62,7 +62,11 @@ const tinybee = async (options) => { // self-invoking function
           const view = migrate.createReadStream();
           const obj = {};
           for await (const entry of view) {
-            obj[entry.key.toString()] = entry.value.toString();
+            entry.key = entry.key.toString();
+            if (entry.key.includes('\x00')) {
+              entry.key = entry.key.split('\x00')[1];
+            }
+            obj[entry.key] = entry.value.toString();
           }
           if (options.debug) console.log('migrating core entries', obj);
           await input.purge();
@@ -128,7 +132,10 @@ const tinybee = async (options) => { // self-invoking function
           const obj = {};
           for await (const entry of all) {
             entry.value = entry.value.toString();
-            entry.key = entry.key.toString().replace(/\\x00/g, '');
+            entry.key = entry.key.toString();
+            if (entry.key.includes('\x00')) {
+              entry.key = entry.key.split('\x00')[1];
+            }
             if (['[', '{'].includes(entry.value[0])) entry.value = JSON.parse(entry.value);
             obj[entry.key] = entry.value;
           }
