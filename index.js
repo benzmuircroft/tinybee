@@ -128,12 +128,17 @@ const tinybee = async (options) => { // self-invoking function
           const obj = {};
           for await (const entry of all) {
             entry.value = entry.value.toString();
+            entry.key = entry.key.toString().replace(/\\x00/g, '');
             if (['[', '{'].includes(entry.value[0])) entry.value = JSON.parse(entry.value);
             obj[entry.key.toString()] = entry.value;
           }
           return obj;
         }
         else {
+          if (sub) {
+            sub = db.sub(sub);
+            await sub.get(k);
+          }
           k = await db.get(k);
           if (!k) return null;
           k = k.value.toString();
