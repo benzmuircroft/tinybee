@@ -74,8 +74,8 @@ const tinybee = async (options) => { // self-invoking function
           await input.ready();
           db = new Hyperbee(input);
           await db.ready();
-          for (const entry in obj) {
-            await db.put(entry, obj[entry]);
+          for (const [key, value] of Object.entries(obj)) {
+            await db.put(key, value);
           }
           await migrate.close();
           await backup.purge();
