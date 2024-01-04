@@ -130,7 +130,7 @@ const tinybee = async (options) => { // self-invoking function
             entry.value = entry.value.toString();
             entry.key = entry.key.toString().replace(/\\x00/g, '');
             if (['[', '{'].includes(entry.value[0])) entry.value = JSON.parse(entry.value);
-            obj[entry.key.toString()] = entry.value;
+            obj[entry.key] = entry.value;
           }
           return obj;
         }
