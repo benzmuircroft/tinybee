@@ -32,59 +32,41 @@ const tinybee = async (options) => { // self-invoking function
     if (!writable) { // todo: use RAM
       if (options.debug) console.log('read only core');
       input = store.get(options.inputName, { sparse: false });
+      await input.ready();
       db = new Hyperbee(input);
       await db.ready();
       if (db.writable) writable = true; // user is recovering using hex id not publicKey assumed above
     }
     else {
-      let backup;
-      backup = store.get({ name: `${options.inputName}-backup`, sparse:false, createIfMissing: false, overwrite: false });
-      if (options.debug) console.log(backup);
-      if (backup.id) {
-        input = store.get({ name: options.inputName, sparse: false, overwrite: true });
-        if (options.debug) console.log('core migration was not completed. using backup instead.');
-        await backup.ready();
-        let s1 = backup.replicate(true);
-        let s2 = input.replicate(false);
-        s1.pipe(s2).pipe(s1);
-        db = new Hyperbee(input);
-        await db.ready();
-      }
-      else {
+      input = store.get({ name: options.inputName, sparse: false });
+      await input.ready();
+      if (input.length) {
+        const migrate = new Hyperbee(input);
+        const view = migrate.createReadStream();
+        const obj = {};
+        for await (const entry of view) {
+          entry.key = entry.key.toString();
+          if (entry.key.includes('\x00')) {
+            entry.key = entry.key.split('\x00')[1];
+          }
+          entry.value = entry.value.toString();
+          obj[entry.key] = entry.value;
+        }
+        if (options.debug) console.log('migrating core entries', obj);
+        await input.purge();
         input = store.get({ name: options.inputName, sparse: false });
         await input.ready();
-        if (input.length) {
-          backup = store.get({ name: `${options.inputName}-backup`, sparse: false });
-          let s1 = input.replicate(true);
-          let s2 = backup.replicate(false);
-          s1.pipe(s2).pipe(s1);
-          let migrate = new Hyperbee(input);
-          const view = migrate.createReadStream();
-          const obj = {};
-          for await (const entry of view) {
-            entry.key = entry.key.toString();
-            if (entry.key.includes('\x00')) {
-              entry.key = entry.key.split('\x00')[1];
-            }
-            obj[entry.key] = entry.value.toString();
-          }
-          if (options.debug) console.log('migrating core entries', obj);
-          await input.purge();
-          input = store.get({ name: 'input', sparse: false });
-          await input.ready();
-          db = new Hyperbee(input);
-          await db.ready();
-          for (const [key, value] of Object.entries(obj)) {
-            await db.put(key, value);
-          }
-          await migrate.close();
-          await backup.purge();
+        db = new Hyperbee(input);
+        await db.ready();
+        for (const [key, value] of Object.entries(obj)) {
+          await db.put(key, value);
         }
-        else {
-          if (options.debug) console.log('fresh core');
-          db = new Hyperbee(input);
-          await db.ready();
-        }
+        await migrate.close();
+      }
+      else {
+        if (options.debug) console.log('fresh core');
+        db = new Hyperbee(input);
+        await db.ready();
       }
     }
     
