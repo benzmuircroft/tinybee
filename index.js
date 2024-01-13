@@ -30,13 +30,12 @@ const tinybee = async (options) => { // self-invoking function
     await store.ready();
     let input, db, tb;
 
-    if (!readOnly) { // todo: use RAM
+    if (readOnly) { // todo: use RAM
       if (debug) console.log('read only core');
       input = store.get({ key: inputName, sparse: false, ...options });
       await input.ready();
       db = new Hyperbee(input);
       await db.ready();
-      if (db.writable) writable = true; // user is recovering using hex id not publicKey assumed above
     }
     else {
       if (inputName) {
@@ -157,7 +156,7 @@ const tinybee = async (options) => { // self-invoking function
         }
       }
     }; // tb
-    if (!writable) {
+    if (readOnly) {
       delete tb.batch;
       delete tb.put;
       delete tb.del;
