@@ -10,8 +10,7 @@ const tinybee = async (options) => { // self-invoking function
     }
     if (typeof options.folderNameOrCorestore  == 'string') {
       const Corestore = require('corestore');
-      if (Object.keys(options).length) store = new Corestore(options.folderNameOrCorestore, options);
-      else store = new Corestore(options.folderNameOrCorestore);
+      store = new Corestore(options.folderNameOrCorestore);
     }
     else if (typeof options.folderNameOrCorestore == 'object') {
       store = options.folderNameOrCorestore;
