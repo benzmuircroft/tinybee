@@ -20,6 +20,8 @@ const tinybee = async (_options) => { // self-invoking function
     else {
       throw new Error('options.folderNameOrCorestore should be a string or a corestore');
     }
+
+    delete options.folderNameOrCorestore;
     
     if (options.id && options.key && options.discoveryKey) {
       delete options.inputName;
@@ -48,6 +50,7 @@ const tinybee = async (_options) => { // self-invoking function
         scalar: b4a.from(options.id, 'hex'),
         publicKey: b4a.from(options.key, 'hex')
       }).get();
+      console.log(options.keyPair.scalar.toString('hex'), options.keyPair.publicKey.toString('hex'));
       delete options.id;
       delete options.key;
       delete options.discoveryKey;
