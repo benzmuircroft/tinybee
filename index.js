@@ -5,7 +5,7 @@ const tinybee = async (options) => { // self-invoking function
     
     let store;
 
-    if (!['string','undefined'].includes(typeof options.inputName)) {
+    if (!['string','undefined'].includes(typeof options.inputName) && !options.key) {
       throw new Error('options.inputName should be undefined or a string');
     }
     if (typeof options.folderNameOrCorestore  == 'string') {
@@ -25,6 +25,7 @@ const tinybee = async (options) => { // self-invoking function
       options.inputName = b4a.from(options.inputName, 'hex');
       writable = false;
     }
+    
     const debug = options.debug;
     const inputName = options.inputName;
 
@@ -43,7 +44,12 @@ const tinybee = async (options) => { // self-invoking function
       if (db.writable) writable = true; // user is recovering using hex id not publicKey assumed above
     }
     else {
-      input = store.get({ name: inputName, sparse: false, ...options });
+      if (inputName) {
+        input = store.get({ name: inputName, sparse: false, ...options });
+      }
+      else {
+        input = store.get({ sparse: false, ...options });
+      }
       await input.ready();
       if (input.length) {
         const migrate = new Hyperbee(input);
@@ -59,7 +65,12 @@ const tinybee = async (options) => { // self-invoking function
         }
         if (debug) console.log('migrating core entries', obj);
         await input.purge();
-        input = store.get({ name: inputName, sparse: false, ...options });
+        if (inputName) {
+          input = store.get({ name: inputName, sparse: false, ...options });
+        }
+        else {
+          input = store.get({ sparse: false, ...options });
+        }
         await input.ready();
         db = new Hyperbee(input);
         await db.ready();
