@@ -19,15 +19,10 @@ const tinybee = async (options) => { // self-invoking function
     else {
       throw new Error('options.folderNameOrCorestore should be a string or a corestore');
     }
-
-    let writable = true;
-    if (options.inputName && options.inputName.length == 64) {
-      options.inputName = b4a.from(options.inputName, 'hex');
-      writable = false;
-    }
     
     const debug = options.debug;
     const inputName = options.inputName;
+    const readOnly = options.readOnly;
 
     delete options.debug;
     delete options.inputName;
@@ -35,7 +30,7 @@ const tinybee = async (options) => { // self-invoking function
     await store.ready();
     let input, db, tb;
 
-    if (!writable) { // todo: use RAM
+    if (!readOnly) { // todo: use RAM
       if (debug) console.log('read only core');
       input = store.get({ key: inputName, sparse: false, ...options });
       await input.ready();
