@@ -20,9 +20,14 @@ const tinybee = async (options) => { // self-invoking function
       throw new Error('options.folderNameOrCorestore should be a string or a corestore');
     }
     
+    if (options.id && options.key && options.discoveryKey) {
+      delete options.inputName;
+    }
+    
     const debug = options.debug;
     const inputName = options.inputName;
     const readOnly = options.readOnly;
+
 
     delete options.debug;
     delete options.inputName;
