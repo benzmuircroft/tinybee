@@ -25,20 +25,25 @@ const tinybee = async (options) => { // self-invoking function
       options.inputName = b4a.from(options.inputName, 'hex');
       writable = false;
     }
+    const debug = options.debug;
+    const inputName = options.inputName;
+
+    delete options.debug;
+    delete options.inputName;
     
     await store.ready();
     let input, db, tb;
 
     if (!writable) { // todo: use RAM
-      if (options.debug) console.log('read only core');
-      input = store.get(options.inputName, { sparse: false });
+      if (debug) console.log('read only core');
+      input = store.get({ key: inputName, sparse: false, ...options });
       await input.ready();
       db = new Hyperbee(input);
       await db.ready();
       if (db.writable) writable = true; // user is recovering using hex id not publicKey assumed above
     }
     else {
-      input = store.get({ name: options.inputName, sparse: false });
+      input = store.get({ name: inputName, sparse: false, ...options });
       await input.ready();
       if (input.length) {
         const migrate = new Hyperbee(input);
@@ -52,9 +57,9 @@ const tinybee = async (options) => { // self-invoking function
           entry.value = entry.value.toString();
           obj[entry.key] = entry.value;
         }
-        if (options.debug) console.log('migrating core entries', obj);
+        if (debug) console.log('migrating core entries', obj);
         await input.purge();
-        input = store.get({ name: options.inputName, sparse: false });
+        input = store.get({ name: inputName, sparse: false, ...options });
         await input.ready();
         db = new Hyperbee(input);
         await db.ready();
@@ -64,13 +69,14 @@ const tinybee = async (options) => { // self-invoking function
         await migrate.close();
       }
       else {
-        if (options.debug) console.log('fresh core');
+        if (debug) console.log('fresh core');
         db = new Hyperbee(input);
         await db.ready();
       }
     }
     
     tb = {
+      db,
       batch: async function(array /*[[put/del, k, v],]*/, sub) {
         let batch;
         if (sub) {
@@ -85,7 +91,7 @@ const tinybee = async (options) => { // self-invoking function
             throw new Error(`Malformed batch at ${JSON.stringify(job)}`);
           }
           if (job[2] && typeof job[2] !== 'string') job[2] = JSON.stringify(job[2]);
-          if (options.debug) console.log(job[0], job[1], job[2]);
+          if (debug) console.log(job[0], job[1], job[2]);
           if (job[0] == 'put') await batch.put(job[1], job[2]);
           else if (job[1] == 'del') await batch.del(job[1]);
         }
