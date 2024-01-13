@@ -1,4 +1,5 @@
-const tinybee = async (options) => { // self-invoking function
+const tinybee = async (_options) => { // self-invoking function
+  const options = { ..._options };
   return new Promise(async (resolve) => {
     const Hyperbee = require('hyperbee');
     const Keychain = require('keypear');
@@ -43,6 +44,13 @@ const tinybee = async (options) => { // self-invoking function
       await db.ready();
     }
     else {
+      options.keyPair = new Keychain({
+        scalar: b4a.from(options.id, 'hex'),
+        publicKey: b4a.from(options.key, 'hex')
+      }).get();
+      delete options.id;
+      delete options.key;
+      delete options.discoveryKey;
       if (inputName) {
         input = store.get({ name: inputName, writable: true, sparse: false, ...options });
       }
