@@ -1,6 +1,7 @@
 const tinybee = async (options) => { // self-invoking function
   return new Promise(async (resolve) => {
     const Hyperbee = require('hyperbee');
+    const Keychain = require('keypear');
     const b4a = require('b4a');
     
     let store;
@@ -43,10 +44,10 @@ const tinybee = async (options) => { // self-invoking function
     }
     else {
       if (inputName) {
-        input = store.get({ name: inputName, sparse: false, ...options });
+        input = store.get({ name: inputName, writable: true, sparse: false, ...options });
       }
       else {
-        input = store.get({ sparse: false, ...options });
+        input = store.get({ writable: true, sparse: false, ...options });
       }
       await input.ready();
       if (input.length) {
@@ -64,10 +65,10 @@ const tinybee = async (options) => { // self-invoking function
         if (debug) console.log('migrating core entries', obj);
         await input.purge();
         if (inputName) {
-          input = store.get({ name: inputName, sparse: false, ...options });
+          input = store.get({ name: inputName, writable: true, sparse: false, ...options });
         }
         else {
-          input = store.get({ sparse: false, ...options });
+          input = store.get({ writable: true, sparse: false, ...options });
         }
         await input.ready();
         db = new Hyperbee(input);
