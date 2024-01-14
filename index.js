@@ -2,12 +2,11 @@ const tinybee = async (_options) => { // self-invoking function
   const options = { ..._options };
   return new Promise(async (resolve) => {
     const Hyperbee = require('hyperbee');
-    const Keychain = require('keypear');
     const b4a = require('b4a');
     
     let store;
 
-    if (!['string','undefined'].includes(typeof options.inputName) && !options.key) {
+    if (!['string','undefined'].includes(typeof options.inputName)) {
       throw new Error('options.inputName should be undefined or a string');
     }
     if (typeof options.folderNameOrCorestore  == 'string') {
@@ -20,46 +19,27 @@ const tinybee = async (_options) => { // self-invoking function
     else {
       throw new Error('options.folderNameOrCorestore should be a string or a corestore');
     }
-
-    delete options.folderNameOrCorestore;
-    
-    if (options.id && options.key && options.discoveryKey) {
-      delete options.inputName;
-    }
     
     const debug = options.debug;
     const inputName = options.inputName;
-    const readOnly = options.readOnly;
-
+    const key = options.key;
 
     delete options.debug;
     delete options.inputName;
+    delete options.key;
     
     await store.ready();
     let input, db, tb;
 
-    if (readOnly) { // todo: use RAM
+    if (key) { // todo: use RAM
       if (debug) console.log('read only core');
-      input = store.get({ key: inputName, sparse: false, ...options });
+      input = store.get(inputName, key, { sparse: false, ...options });
       await input.ready();
       db = new Hyperbee(input);
       await db.ready();
     }
     else {
-      options.keyPair = new Keychain({
-        scalar: b4a.from(options.id, 'hex'),
-        publicKey: b4a.from(options.key, 'hex')
-      }).get();
-      console.log(options.keyPair.scalar.toString('hex'), options.keyPair.publicKey.toString('hex'));
-      delete options.id;
-      delete options.key;
-      delete options.discoveryKey;
-      if (inputName) {
-        input = store.get({ name: inputName, writable: true, sparse: false, ...options });
-      }
-      else {
-        input = store.get({ writable: true, sparse: false, ...options });
-      }
+      input = store.get(inputName, { sparse: false, ...options });
       await input.ready();
       if (input.length) {
         const migrate = new Hyperbee(input);
@@ -75,12 +55,7 @@ const tinybee = async (_options) => { // self-invoking function
         }
         if (debug) console.log('migrating core entries', obj);
         await input.purge();
-        if (inputName) {
-          input = store.get({ name: inputName, writable: true, sparse: false, ...options });
-        }
-        else {
-          input = store.get({ writable: true, sparse: false, ...options });
-        }
+        input = store.get(inputName, { sparse: false, ...options });
         await input.ready();
         db = new Hyperbee(input);
         await db.ready();
@@ -172,7 +147,7 @@ const tinybee = async (_options) => { // self-invoking function
         }
       }
     }; // tb
-    if (readOnly) {
+    if (key) {
       delete tb.batch;
       delete tb.put;
       delete tb.del;
