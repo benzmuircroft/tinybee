@@ -6,9 +6,6 @@ const tinybee = async (_options) => { // self-invoking function
     
     let store;
 
-    if (!['string','undefined'].includes(typeof options.inputName)) {
-      throw new Error('options.inputName should be undefined or a string');
-    }
     if (typeof options.folderNameOrCorestore  == 'string') {
       const Corestore = require('corestore');
       store = new Corestore(options.folderNameOrCorestore);
@@ -21,25 +18,26 @@ const tinybee = async (_options) => { // self-invoking function
     }
     
     const debug = options.debug;
-    const inputName = options.inputName;
     const key = options.key;
+    const keyPair = options.keyPair;
 
+    delete options.folderNameOrCorestore;
     delete options.debug;
-    delete options.inputName;
     delete options.key;
+    delete options.keyPair;
     
     await store.ready();
     let input, db, tb;
 
-    if (key) { // todo: use RAM
+    if (!keyPair) { // todo: use RAM
       if (debug) console.log('read only core');
-      input = store.get(inputName, key, { sparse: false, ...options });
+      input = store.get({ key });
       await input.ready();
       db = new Hyperbee(input);
       await db.ready();
     }
     else {
-      input = store.get(inputName, { sparse: false, ...options });
+      input = store.get({ sparse: false, keyPair });
       await input.ready();
       if (input.length) {
         const migrate = new Hyperbee(input);
@@ -55,7 +53,7 @@ const tinybee = async (_options) => { // self-invoking function
         }
         if (debug) console.log('migrating core entries', obj);
         await input.purge();
-        input = store.get(inputName, { sparse: false, ...options });
+        input = store.get(key, { sparse: false, keyPair });
         await input.ready();
         db = new Hyperbee(input);
         await db.ready();
@@ -147,7 +145,7 @@ const tinybee = async (_options) => { // self-invoking function
         }
       }
     }; // tb
-    if (key) {
+    if (!keyPair) {
       delete tb.batch;
       delete tb.put;
       delete tb.del;
