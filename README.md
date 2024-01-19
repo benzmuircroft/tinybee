@@ -10,7 +10,7 @@ npm i "github:benzmuircroft/tinybee"
 ```js
 const tinybee = require('tinybee')({
   folderNameOrCorestore: './location',
-  inputName: 'test',
+  keyPair,
   ...options,
   debug: true // see what it's doing under the hood ...
 });
