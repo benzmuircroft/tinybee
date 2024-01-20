@@ -25,6 +25,7 @@ const tinybee = async (_options) => { // self-invoking function
     delete options.debug;
     delete options.key;
     delete options.keyPair;
+    // sanitisation complete
     
     await store.ready();
     let input, db, tb;
