@@ -3,7 +3,6 @@ const tinybee = async (_options) => {
   return new Promise((resolve) => {
     ;(async function() {
       const Hyperbee = require('hyperbee');
-      const fs = require('fs').promises;
       
       let store;
   
