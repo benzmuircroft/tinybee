@@ -1,4 +1,4 @@
-const tinybee = async (_options) => { // self-invoking function
+const tinybee = async (_options) => {
   const options = { ..._options };
   return new Promise((resolve) => {
     ;(async function() {
