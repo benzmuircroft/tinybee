@@ -38,8 +38,13 @@ const tinybee = async (_options) => {
         await db.ready();
       }
       else {
-        input = store.get({ keyPair });
-        await input.ready();
+        if (store.isCore) {
+          input = store;
+        }
+        else {
+          input = store.get({ keyPair });
+          await input.ready();
+        }
         if (input.length) {
           if (debug) console.log('removing cores history ...');
           db = new Hyperbee(input);
